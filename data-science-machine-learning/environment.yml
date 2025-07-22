@@ -1,0 +1,12 @@
+name: cn_ml_course
+channels:
+  - defaults
+dependencies:
+  - jupyter
+  - scikit-learn
+  - matplotlib
+  - pandas
+  - jupyterlab
+  - numpy
+  - seaborn
+
