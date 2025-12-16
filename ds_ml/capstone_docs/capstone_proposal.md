@@ -1,43 +1,142 @@
-# Capstone Proposal
 
-Nomadic Coder
+# Predicting Art Prices at Auction
 
-Today, Right Now.
+Machine Learning Project Brief <br>
+December 2025 <br>
+by Ugo Ikpeazu <br>
 
-## Domain Background
+## Contents
 
-Please provide background information of the domain from which the project is proposed.  If your project is all about cucumbers, tell us a bit about cucumbers. We don't want to know every detail ever, but enough to be familiar and have an intuition into the domain. If you have done any research into the problem, please cite your sources in this section.
+1.  Domain Background
+2.  Problem Statement
+3.  Dataset
+    *   Dataset Overview
+    *   Feature Engineering Plan
+4.  Solution Statement
+    *   CatBoost – A Gradient Boost Algorithm
+    *   Limitations of CatBoost
+5.  Benchmark Model
+6.  Evaluation Metrics
+7.  Project Design  
+    **Bibliography**
 
-## Problem Statement
+***
 
-In this section, clearly describe the problem that is to be solved. What is the problem that needs a solution. Specifically what is the actionable intelligence your machine learning will provide? The problem should be quantifiable (the problem can be expressed in mathematical or logical terms) , measurable (the problem can be measured by some metric and clearly observed), and replicable (the problem can be reproduced and occurs more than once).
+## 1. Domain Background
 
-This step can be tricky to write well.  People often like to give their solutions within the problem statement, don't make that mistake.  Here is an example:
+The primary domain of this project is Art, this includes paintings, sculptures, installations etc. One of the primary methods for determining the price of a piece of art is through auctions. This project proposes a machine learning model that could be used in different contexts e.g. to support auction preparation for artists and collectors, to assess auction performance etc. The risks of the model are that it could potentially be gamed by Artists who try to find patterns and develop works that align with those patterns, in hopes of securing higher auction prices. This risk already exists in the art industry and is not exacerbated by the implementation of this or similar machine learning models.
 
->I will use XGBoost to solve the kaggle fish competition.
+***
 
-This is _not_ a problem.  It's a solution.  The problem is "automatically identify what kinds of fish are in a given picture"  The solution may be "use xgboost"
+## 2. Problem Statement
 
-So what exactly is the problem you are going to attempt to solve? Try to frame it in familiar ML terms, is it classification? Regression? "Give a dataset of .... the goal is to accurately predict / model / classify X"
+> “No single factor should be considered in isolation or as more important than another,” said Chloe Waddington, partner at London-born gallery Timothy Taylor. “Valuing an artwork is a combination of many factors: institutional recognition, market demand, career stage of the artist, condition, authenticity, medium, et cetera.” (Rabb, 2024)
 
-Nearly all ML problems can be reduced to that form and this is very helpful because it narrows the scope of what you are actually trying to accomplish. It's very easy to get lost in the _bigger_ problem of the domain, but we want to stay focused on the bite-sized ML portion you are going to attempt.
+Considering the domain and situation described above, there are a few problems with the way that art prices are determined (Goodbody, 2025):
 
-## Datasets and Inputs
+*   Famous auctions take place in specific cities and are controlled by legacy institutions.
+*   Highly valued pieces tend to be sold within the same channels and networks.
+*   Investors (both new and experienced) may not be able to independently verify the value a piece is expected to fetch on the market either before selling or buying.
 
-The dataset(s) and/or input(s) being considered for the project should be thoroughly described, such as how they relate to the problem and why they should be used. Information such as how the dataset or input is (was) obtained, and the characteristics of the dataset or input, should be included with relevant references and citations as necessary.  You don't need to be worried about citation format, just make sure to cite your sources so we can follow the trail. 
+**Goal:**  
+Given a dataset of art prices and features, the goal of this project is to develop a model that can predict future auction sale prices based on specific features. At this stage, the project does not account for the emotional factor associated with art purchases and auctions. Sentiment analysis may be included in future editions. 
 
-## Solution Statement
+***
 
-In this section, clearly describe your proposed solution to the problem. What machine learning techniques are you proposing to do with the dataset. How does that solve the problem you described earlier? 
+## 3. Dataset
 
-## Benchmark Model
+### 3.1. Dataset Overview
 
-Provide details for a benchmark model.  What is the baseline you need to beat in order to feel like your project was a success? Keep in mind that every project is a success it doesn't matter if you beat your benchmark - because learning is the goal. But, we do of course need to be practical. What is a reasonable benchmark? Are there pre-existing ML solutions or papers? If yes, what are they? If no, then consider a dummy model, what would random guessing yield on your problem?
+*   **Name:** Art Price Dataset
+*   **Description:** Includes 754 artworks sold by Sotheby’s, a leading auction house.
+*   **License:** CC BY-NC-SA 4.0
+*   **Format:** CSV
+*   **Available at:** Kaggle - Art Price Dataset - https://www.kaggle.com/datasets/flkuhm/art-price-dataset 
 
-## Evaluation Metrics
+Features include: image of the piece, price, artist, title, year of creation, position of signature, condition, period, movement.
 
-Propose at least three evaluation metrics that can be used to quantify the performance of both the benchmark model and the solution model. The evaluation metrics you propose should be appropriate given the context of the data and the problem statement. Describe how the evaluation metrics are derived and explain why they are a good choice for your project.
+### 3.2. Feature Engineering Plan
 
-## Project Design
+With the exception of images, all features will be included in this first iteration of the project. Future versions will include images to assess how the model evolves when learning on images.
 
-In this final section, summarize a workflow for your capstone. List out in steps (diagrams encouraged!) what you need to do, end-to-end to complete your capstone.  Start at the beginning (the data) and work your way through until the end results.  Try to be as detailed as possible. This planning session will greatly help you implement your project.
+***
+
+## 4. Solution Statement
+
+This project proposes to use **CatBoost** as the primary model.
+
+### 4.1. CatBoost – A Gradient Boost Algorithm
+
+Gradient Boost algorithms work by minimizing the loss function i.e. they work by identifying where things are inaccurate. This is done by creating sequential decision trees that correct the error with each new iteration, until the final model is as close to the target (accurate) as possible. Each new tree corrects the error from the previous tree and not the error of the entire problem. CatBoost improves on this by introducing ordered boosting and ordered target statistics. The algorithm has interfaces including *CatBoost* (a general model), *CatBoostRegressor* (for prediction problems) and *CatBoostClassifier* (for classification problems) (CatBoost, na). 
+
+**How it works:**  
+`gradient boosting → ordered boosting → categorical feature handling → regularization`
+
+**Features of CatBoost:**
+
+*   **Ordered Boosting** – GBM algorithms tend to be biased because they may predict on future data points that leak. CatBoost prevents this by using a permutation-driven approach to handle data. 
+
+*   **Ordered target statistics** – CatBoost uses ordered target statistics, meaning that it shuffles the data and performs its tasks on the datapoints from the previous row and not the current row. This allows the algorithm to work as if it were dealing with data in real-time where it wouldn’t have upfront access to future data. In addition, the algorithm ensures that it uses only the models gradients and categorical features, not their target values. In other words, the algorithm looks at the error of the data point(s) and categorical features but does not peek at what the data point will predict. 
+
+*   **Prevents over-fitting** – once the model detects overfitting based on the user-defined validation data, CatBoost can stop the training process. 
+
+*   **Categorical features** – CatBoost works well with non-numerical features. The algorithm makes it possible to set/identify categorical (non-numerical) features which are then integrated to the learning process. To achieve this, the algorithm calculates a statistic for the feature based on previous rows. This ability to work with diverse features also reduces the need for extensive feature engineering since the algorithm can learn from more feature types.
+
+*   **Strong regularization** – regularization penalizes complex models to reduce their variance and improve their ability to generalize on unseen data. CatBoost applies regularization to models.
+
+**Summary:**  
+In summary, CatBoost applies the same approach to learning as Gradient Boost in the process of how both algorithms work. Their difference lies in how each algorithm handles the data it uses for training. Unlike regular GBM, CatBoost reduces bias by ensuring that there is no data leakage, meaning that current data is not used in predictions. 
+
+### 4.2. Limitations of CatBoost
+Some limitations of CatBoost are:
+*   It is slightly slower than of GBM such as LightGBM
+*   It is potentially more computationally expensive because of the iterations
+*   It may not be relevant or work as well as other algorithms when there are no categorical features 
+
+
+***
+
+## 5. Benchmark Model
+
+Initially planned benchmark: **Linear Regression** (trained on year and price).  
+Updated benchmark: Simplified **CatBoost** using a subset of features (year, price, movement) with no parameter tuning.
+
+***
+
+## 6. Evaluation Metrics
+
+*   **R²:** Explains how much variation in the target variable is explained by the model.
+*   **Mean Absolute Error (MAE):** Measures the average size of prediction errors.
+
+***
+
+## 7. Project Design
+
+Steps and logic:
+
+*   Data identification and sourcing
+*   Exploratory Data Analysis (EDA)
+*   Project setup: module imports, dataset initialization
+*   Handle missing values
+*   Assign X and y labels for benchmark
+*   Split data (80-20) for benchmark
+*   Fit benchmark model
+*   Assign X and y labels for primary model
+*   Split data (80-20) for primary model
+*   Initialize CatBoost
+*   Define categorical features
+*   Fit CatBoost model
+*   Test model (predict on test data)
+*   Evaluate models
+*   Document findings
+
+***
+
+## Bibliography
+*   CatBoost. (na). Training. From CatBoost: https://catboost.ai/docs/en/features/training
+*   Goodbody, L. (2025, July 17). How Auction Houses Determine Art Valuations. From My Art Broker: https://www.myartbroker.com/auction/articles/how-auction-houses-value-art
+*   Rabb, M. (2024, November 13). What Determines the Price of an Artwork? From Artsy: https://www.artsy.net/article/artsy-editorial-determines-price-artwork
+
+
+***
+
